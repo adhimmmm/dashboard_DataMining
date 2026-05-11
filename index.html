@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GreenMine Dashboard — Data Mining</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-icon">🌿</span>
+      <span class="logo-text">GreenMine</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a class="nav-item active" data-section="overview"><span class="nav-icon">◈</span>Overview</a>
+      <a class="nav-item" data-section="dataset"><span class="nav-icon">◉</span>Dataset</a>
+      <a class="nav-item" data-section="preprocessing"><span class="nav-icon">◧</span>Pre-processing</a>
+      <a class="nav-item" data-section="model"><span class="nav-icon">◈</span>Model</a>
+      <a class="nav-item" data-section="knowledge"><span class="nav-icon">◉</span>Knowledge</a>
+    </nav>
+    <div class="sidebar-footer">
+      <p>Mini Project — Penggalian Data</p>
+      <p>2025 · Kelompok</p>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="topbar-title">
+        <h1>Greenhouse Crop Yield Prediction</h1>
+        <span class="topbar-sub">Supervised Classification · Yield_Status: Tinggi / Rendah</span>
+      </div>
+      <div class="topbar-badges">
+        <span class="badge badge-green">Random Forest ✓ Best</span>
+        <span class="badge badge-yellow">Decision Tree</span>
+        <span class="badge badge-red">Naïve Bayes</span>
+      </div>
+    </header>
+
+    <!-- ── OVERVIEW ── -->
+    <section id="overview" class="section active">
+      <div class="section-label">/ 01 OVERVIEW</div>
+      <div class="kpi-grid" id="kpiGrid"></div>
+      <div class="card-row">
+        <div class="card wide">
+          <div class="card-head">
+            <h3>Perbandingan Performa Model</h3>
+            <div class="metric-tabs" id="metricTabs"></div>
+          </div>
+          <div class="chart-wrap"><canvas id="modelCompareChart"></canvas></div>
+        </div>
+        <div class="card narrow">
+          <div class="card-head"><h3>Distribusi Kelas Target</h3><span class="card-tag">Setelah SMOTE</span></div>
+          <div class="chart-wrap donut-wrap"><canvas id="yieldDonutChart"></canvas></div>
+          <div class="donut-legend">
+            <div class="dleg"><span class="dot green"></span>Tinggi (1) — 5.445</div>
+            <div class="dleg"><span class="dot red"></span>Rendah (0) — 5.445</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── DATASET ── -->
+    <section id="dataset" class="section">
+      <div class="section-label">/ 02 DATASET</div>
+      <div class="info-banner">
+        <span>📦</span>
+        <div><strong>Sumber:</strong> Greenhouse Crop Yields · Kaggle &nbsp;·&nbsp;
+        <strong>Data Awal:</strong> 10.400 baris &nbsp;·&nbsp; <strong>Fitur Asal:</strong> 20 atribut</div>
+      </div>
+      <div class="card full">
+        <div class="card-head">
+          <h3>Fitur Dataset</h3>
+          <div class="filter-tabs" id="featureFilter"></div>
+        </div>
+        <div class="table-scroll">
+          <table class="data-table"><thead><tr>
+            <th>#</th><th>Atribut</th><th>Kategori</th><th>Status</th><th>Keterangan</th>
+          </tr></thead><tbody id="featureTableBody"></tbody></table>
+        </div>
+      </div>
+      <div class="card full">
+        <div class="card-head"><h3>Sample Data Pasca-Preprocessing</h3><span class="card-tag">Normalized [0–1]</span></div>
+        <div class="table-scroll">
+          <table class="data-table"><thead><tr>
+            <th>crop_type</th><th>avg_temp</th><th>humidity</th><th>co2_ppm</th><th>light_lux</th>
+            <th>irrigation</th><th>fert_N</th><th>fert_P</th><th>fert_K</th>
+            <th>soil_pH</th><th>pest_sev</th><th>Yield_Status</th>
+          </tr></thead><tbody id="sampleDataBody"></tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── PREPROCESSING ── -->
+    <section id="preprocessing" class="section">
+      <div class="section-label">/ 03 PRE-PROCESSING</div>
+      <div class="card-row">
+        <div class="card wide">
+          <div class="card-head"><h3>Missing Values per Atribut</h3><span class="card-tag">Sebelum Imputasi</span></div>
+          <div class="chart-wrap"><canvas id="missingValueChart"></canvas></div>
+        </div>
+        <div class="card narrow">
+          <div class="card-head"><h3>Class Balancing (SMOTE)</h3></div>
+          <div class="chart-wrap"><canvas id="smoteChart"></canvas></div>
+        </div>
+      </div>
+      <div class="card full">
+        <div class="card-head"><h3>Pipeline Pre-processing</h3><span class="card-tag">Klik step untuk detail</span></div>
+        <div class="pipeline" id="pipelineSteps"></div>
+        <div class="pipeline-detail hidden" id="pipelineDetail"></div>
+      </div>
+      <div class="card-row">
+        <div class="card half">
+          <div class="card-head"><h3>Label Encoding — crop_type</h3></div>
+          <table class="data-table small"><thead><tr><th>Kategori Asli</th><th>Label</th></tr></thead>
+          <tbody id="encodingTable"></tbody></table>
+        </div>
+        <div class="card half">
+          <div class="card-head"><h3>Diskritisasi Target — Yield_Status</h3></div>
+          <table class="data-table small"><thead><tr><th>Syarat</th><th>Kelas</th><th>Label</th></tr></thead>
+          <tbody>
+            <tr><td>&lt; Rata-rata (12.38 kg/m²)</td><td>Rendah</td><td><span class="badge badge-red">0</span></td></tr>
+            <tr><td>≥ Rata-rata (12.38 kg/m²)</td><td>Tinggi</td><td><span class="badge badge-green">1</span></td></tr>
+          </tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── MODEL ── -->
+    <section id="model" class="section">
+      <div class="section-label">/ 04 MODEL &amp; EVALUASI</div>
+      <div class="card full">
+        <div class="card-head">
+          <h3>Confusion Matrix</h3>
+          <div class="cm-selector" id="cmSelector"></div>
+        </div>
+        <div id="confusionMatrices" class="cm-display"></div>
+      </div>
+      <div class="card full">
+        <div class="card-head"><h3>Feature Importance (RFE)</h3><span class="card-tag">Klik bar untuk highlight kategori</span></div>
+        <div class="fi-grid" id="featureImportanceGrid"></div>
+      </div>
+      <div class="card full">
+        <div class="card-head"><h3>Decision Tree — Aturan Keputusan</h3><span class="card-tag">max_depth = 3</span></div>
+        <div class="dt-rules" id="dtRules"></div>
+      </div>
+    </section>
+
+    <!-- ── KNOWLEDGE ── -->
+    <section id="knowledge" class="section">
+      <div class="section-label">/ 05 KNOWLEDGE INTERPRETATION</div>
+
+      <div class="card full">
+        <div class="card-head">
+          <h3>Analisis Kesalahan Klasifikasi</h3>
+          <span class="card-tag">Klik kasus untuk expand detail</span>
+        </div>
+        <div class="error-cards" id="errorCards"></div>
+      </div>
+
+      <div class="card full">
+        <div class="card-head">
+          <h3>Perubahan Paradigma Manajemen</h3>
+          <div class="bva-toggle-wrap">
+            <button class="bva-toggle active" data-mode="split">Split View</button>
+            <button class="bva-toggle" data-mode="after">Data-Driven Only</button>
+          </div>
+        </div>
+        <div class="bva-grid" id="bvaGrid"></div>
+      </div>
+
+      <div class="card full">
+        <div class="card-head"><h3>SOP Digital — Aturan Keputusan</h3></div>
+        <div class="rules-grid" id="rulesGrid"></div>
+      </div>
+    </section>
+  </main>
+
+  <div class="tooltip" id="tooltip"></div>
+  <script src="script.js"></script>
+</body>
+</html>
