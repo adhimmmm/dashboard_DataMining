@@ -561,19 +561,22 @@ const buildSmoteChart = () => {
 const initNavigation = () => {
   const navItems = document.querySelectorAll('.nav-item');
   const sections = document.querySelectorAll('.section');
+  const sidebar  = document.getElementById("sidebar");
+
   navItems.forEach(item => {
     item.addEventListener('click', e => {
       e.preventDefault();
+
       const target = item.dataset.section;
+
       navItems.forEach(n => n.classList.remove('active'));
       sections.forEach(s => s.classList.remove('active'));
+
       item.classList.add('active');
-      const sec = document.getElementById(target);
-      if (sec) {
-        sec.classList.add('active');
-        if (target === 'model')
-          setTimeout(() => $('featureImportanceGrid')?.querySelectorAll('.fi-bar').forEach(b => { b.style.width = b.dataset.w + '%'; }), 150);
-      }
+      document.getElementById(target)?.classList.add('active');
+
+      // ✅ MOBILE: tutup sidebar setelah klik menu
+      sidebar?.classList.remove('open');
     });
   });
 };
@@ -588,6 +591,13 @@ document.addEventListener('DOMContentLoaded', () => {
           pipeline, featureImportance, confusionMatrices, dtRules, errors, bva, rules } = DATA;
 
   initNavigation();
+
+const sidebar = document.getElementById("sidebar");
+const toggle  = document.getElementById("mobileToggle");
+
+toggle?.addEventListener("click", () => {
+  sidebar.classList.toggle("open");
+});
 
   // Overview
   renderKPIs(kpis);

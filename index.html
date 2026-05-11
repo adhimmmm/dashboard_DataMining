@@ -9,37 +9,40 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
+<button class="mobile-toggle" id="mobileToggle">☰</button>
 
-  <aside class="sidebar">
-    <div class="sidebar-logo">
-      <span class="logo-icon">🌿</span>
-      <span class="logo-text">GreenMine</span>
-    </div>
-    <nav class="sidebar-nav">
-      <a class="nav-item active" data-section="overview"><span class="nav-icon">◈</span>Overview</a>
-      <a class="nav-item" data-section="dataset"><span class="nav-icon">◉</span>Dataset</a>
-      <a class="nav-item" data-section="preprocessing"><span class="nav-icon">◧</span>Pre-processing</a>
-      <a class="nav-item" data-section="model"><span class="nav-icon">◈</span>Model</a>
-      <a class="nav-item" data-section="knowledge"><span class="nav-icon">◉</span>Knowledge</a>
-    </nav>
-    <div class="sidebar-footer">
-      <p>Mini Project — Penggalian Data</p>
-      <p>2025 · Kelompok</p>
-    </div>
-  </aside>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <span class="logo-icon">🌿</span>
+    <span class="logo-text">GreenMine</span>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a class="nav-item active" data-section="overview"><span class="nav-icon">◈</span>Overview</a>
+    <a class="nav-item" data-section="dataset"><span class="nav-icon">◉</span>Dataset</a>
+    <a class="nav-item" data-section="preprocessing"><span class="nav-icon">◧</span>Pre-processing</a>
+    <a class="nav-item" data-section="model"><span class="nav-icon">◈</span>Model</a>
+    <a class="nav-item" data-section="knowledge"><span class="nav-icon">◉</span>Knowledge</a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <p>Mini Project — Penggalian Data</p>
+    <p>2025 · Kelompok</p>
+  </div>
+</aside>
 
   <main class="main">
-    <header class="topbar">
-      <div class="topbar-title">
-        <h1>Greenhouse Crop Yield Prediction</h1>
-        <span class="topbar-sub">Supervised Classification · Yield_Status: Tinggi / Rendah</span>
-      </div>
-      <div class="topbar-badges">
-        <span class="badge badge-green">Random Forest ✓ Best</span>
-        <span class="badge badge-yellow">Decision Tree</span>
-        <span class="badge badge-red">Naïve Bayes</span>
-      </div>
-    </header>
+     <header class="topbar">
+    <div>
+      <h1>Greenhouse Crop Yield Prediction</h1>
+      <span class="topbar-sub">Supervised Classification · Yield_Status</span>
+    </div>
+    <div class="topbar-badges">
+      <span class="badge green">Random Forest</span>
+      <span class="badge yellow">Decision Tree</span>
+      <span class="badge red">Naïve Bayes</span>
+    </div>
+  </header>
 
     <!-- ── OVERVIEW ── -->
     <section id="overview" class="section active">
