@@ -23,6 +23,8 @@
     <a class="nav-item" data-section="preprocessing"><span class="nav-icon">◧</span>Pre-processing</a>
     <a class="nav-item" data-section="model"><span class="nav-icon">◈</span>Model</a>
     <a class="nav-item" data-section="knowledge"><span class="nav-icon">◉</span>Knowledge</a>
+    
+    <a class="nav-item" data-section="simulation"><span class="nav-icon">🚀</span>Simulation</a>
   </nav>
 
   <div class="sidebar-footer">
@@ -179,6 +181,34 @@
       <div class="card full">
         <div class="card-head"><h3>SOP Digital — Aturan Keputusan</h3></div>
         <div class="rules-grid" id="rulesGrid"></div>
+      </div>
+    </section>
+
+    <section id="simulation" class="section">
+      <div class="section-label">/ 06 LIVE SIMULATION</div>
+      <div class="card full">
+        <div class="card-head">
+          <h3>Prediksi Hasil Panen Real-time (Random Forest)</h3>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+          <div><label style="font-size: 11px;">Jenis Tanaman (0=Timun, 3=Tomat)</label><input type="number" id="inp_crop" value="3" style="width: 100%; padding: 8px;"></div>
+          <div><label style="font-size: 11px;">Suhu Rata-rata (°C)</label><input type="number" id="inp_temp" value="24.5" style="width: 100%; padding: 8px;"></div>
+          <div><label style="font-size: 11px;">Kelembapan (%)</label><input type="number" id="inp_hum" value="65.0" style="width: 100%; padding: 8px;"></div>
+          <div><label style="font-size: 11px;">CO2 (ppm)</label><input type="number" id="inp_co2" value="600" style="width: 100%; padding: 8px;"></div>
+          <div><label style="font-size: 11px;">Cahaya (Lux)</label><input type="number" id="inp_lux" value="15000" style="width: 100%; padding: 8px;"></div>
+          <div><label style="font-size: 11px;">Irigasi (mm)</label><input type="number" id="inp_irr" value="5.5" style="width: 100%; padding: 8px;"></div>
+          <div><label style="font-size: 11px;">Pupuk N (kg/ha)</label><input type="number" id="inp_n" value="120" style="width: 100%; padding: 8px;"></div>
+          <div><label style="font-size: 11px;">Pupuk P (kg/ha)</label><input type="number" id="inp_p" value="45" style="width: 100%; padding: 8px;"></div>
+          <div><label style="font-size: 11px;">Pupuk K (kg/ha)</label><input type="number" id="inp_k" value="80" style="width: 100%; padding: 8px;"></div>
+          <div><label style="font-size: 11px;">pH Tanah</label><input type="number" id="inp_ph" value="6.5" style="width: 100%; padding: 8px;"></div>
+          <div><label style="font-size: 11px;">Tingkat Hama (0-1)</label><input type="number" id="inp_pest" value="0.1" style="width: 100%; padding: 8px;"></div>
+        </div>
+        <button id="btnPredict" style="padding: 12px 24px; background: var(--accent); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%;">🚀 Analisis Prediksi</button>
+        
+        <div style="margin-top: 20px; padding: 20px; background: rgba(108,240,112,.1); border-radius: 8px; text-align: center;">
+          <h4 style="margin-bottom: 5px; color: var(--text-dim);">Status Hasil Panen:</h4>
+          <h2 id="hasilPrediksi" style="color: var(--accent); font-weight: 800; font-family: var(--fm);">-</h2>
+        </div>
       </div>
     </section>
   </main>
