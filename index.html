@@ -210,6 +210,36 @@
           <h2 id="hasilPrediksi" style="color: var(--accent); font-weight: 800; font-family: var(--fm);">-</h2>
         </div>
       </div>
+
+      <div class="card full" style="margin-top: 25px; border-top: 2px solid #3b82f6;">
+        <div class="card-head">
+          <h3>Prediksi Massal via File CSV (Batch Skenario)</h3>
+        </div>
+        <p style="font-size: 12px; color: var(--text-dim); margin-bottom: 15px; line-height: 1.5;">
+          Masukkan file <b>.csv</b> Anda yang berisi struktur kolom: <br>
+          <code style="background: rgba(255,255,255,0.05); padding: 3px 6px; border-radius: 4px; display: inline-block; margin-top: 5px;">
+            crop_type, avg_temperature_C, humidity_percent, co2_ppm, light_intensity_lux, irrigation_mm, fertilizer_N_kg_ha, fertilizer_P_kg_ha, fertilizer_K_kg_ha, soil_pH, pest_severity
+          </code>
+        </p>
+        
+        <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 15px;">
+          <input type="file" id="csvFile" accept=".csv" style="padding: 8px; background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.2); border-radius: 6px; color: var(--text);">
+          <button id="btnBatchPredict" style="padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s;">📊 Mulai Prediksi Massal</button>
+        </div>
+        
+        <div id="batchResultContainer" style="margin-top: 20px; display: none; max-height: 300px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;">
+          <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
+            <thead style="background: rgba(255,255,255,0.05); position: sticky; top: 0;">
+              <tr>
+                <th style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">Data Ke-</th>
+                <th style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">Komoditas</th>
+                <th style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">Status Prediksi Panen</th>
+              </tr>
+            </thead>
+            <tbody id="batchTableBody"></tbody>
+          </table>
+        </div>
+      </div>
     </section>
   </main>
 

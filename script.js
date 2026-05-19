@@ -1,4 +1,60 @@
 // ==========================================
+// INTEGRASI BATCH PREDIKSI (UPLOAD CSV MASSAL)
+// ==========================================
+document.getElementById("btnBatchPredict")?.addEventListener("click", async () => {
+  const fileInput = document.getElementById("csvFile");
+  const tableBody = document.getElementById("batchTableBody");
+  const container = document.getElementById("batchResultContainer");
+
+  // Validasi apakah user sudah memilih file
+  if (!fileInput.files || fileInput.files.length === 0) {
+    alert("Wajib pilih file CSV terlebih dahulu!");
+    return;
+  }
+
+  const file = fileInput.files[0];
+  const formData = new FormData();
+  formData.append("file", file); // Masukkan file ke form data
+
+  // Tampilkan teks loading sementara proses berjalan
+  tableBody.innerHTML = "<tr><td colspan='3' style='text-align:center; padding:20px; color:var(--text-dim);'>⏳ Sedang mengirim dan memproses data massal di server Python...</td></tr>";
+  container.style.display = "block";
+
+  try {
+    // Tembak file ke endpoint baru di Flask
+    const response = await fetch("http://localhost:5000/predict_batch", {
+      method: "POST",
+      body: formData, // Kirim objek file asli
+    });
+
+    const result = await response.json();
+
+    if (result.status === "success") {
+      tableBody.innerHTML = ""; // Hapus teks loading
+
+      // Looping data array hasil keluaran model
+      result.results.forEach((item) => {
+        const namaTanaman = item.crop_type === 3 ? "🍅 Tomat" : item.crop_type === 0 ? "🥒 Timun" : `Tanaman (${item.crop_type})`;
+        const warnaTeks = item.prediksi.includes("Tinggi") ? "var(--accent)" : "var(--danger)";
+
+        const rowHTML = `
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.03); background: rgba(255,255,255, 0.01);">
+            <td style="padding: 10px 12px; color: var(--text-dim);">${item.baris}</td>
+            <td style="padding: 10px 12px; font-weight: 500;">${namaTanaman}</td>
+            <td style="padding: 10px 12px; font-weight: bold; color: ${warnaTeks};">${item.prediksi}</td>
+          </tr>
+        `;
+        tableBody.innerHTML += rowHTML;
+      });
+    } else {
+      tableBody.innerHTML = `<tr><td colspan='3' style='text-align:center; color:var(--danger); padding:20px;'>❌ Gagal: ${result.message}</td></tr>`;
+    }
+  } catch (err) {
+    tableBody.innerHTML = "<tr><td colspan='3' style='text-align:center; color:var(--danger); padding:20px;'>❌ Koneksi terputus. Pastikan terminal app.py Anda menyala!</td></tr>";
+  }
+});
+
+// ==========================================
 // INTEGRASI API PREDIKSI
 // ==========================================
 document.getElementById("btnPredict")?.addEventListener("click", async () => {
