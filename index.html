@@ -185,62 +185,131 @@
     </section>
 
     <section id="simulation" class="section">
-      <div class="section-label">/ 06 LIVE SIMULATION</div>
+      <div class="section-label">/ 06 LIVE SIMULATION & EXPERIMENT</div>
+      
       <div class="card full">
         <div class="card-head">
-          <h3>Prediksi Hasil Panen Real-time (Random Forest)</h3>
+          <h3>Prediksi Hasil Panen Real-time (Single Test)</h3>
+          <span class="card-tag">Manual Input Input</span>
         </div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
-          <div><label style="font-size: 11px;">Jenis Tanaman (0=Timun, 3=Tomat)</label><input type="number" id="inp_crop" value="3" style="width: 100%; padding: 8px;"></div>
-          <div><label style="font-size: 11px;">Suhu Rata-rata (°C)</label><input type="number" id="inp_temp" value="24.5" style="width: 100%; padding: 8px;"></div>
-          <div><label style="font-size: 11px;">Kelembapan (%)</label><input type="number" id="inp_hum" value="65.0" style="width: 100%; padding: 8px;"></div>
-          <div><label style="font-size: 11px;">CO2 (ppm)</label><input type="number" id="inp_co2" value="600" style="width: 100%; padding: 8px;"></div>
-          <div><label style="font-size: 11px;">Cahaya (Lux)</label><input type="number" id="inp_lux" value="15000" style="width: 100%; padding: 8px;"></div>
-          <div><label style="font-size: 11px;">Irigasi (mm)</label><input type="number" id="inp_irr" value="5.5" style="width: 100%; padding: 8px;"></div>
-          <div><label style="font-size: 11px;">Pupuk N (kg/ha)</label><input type="number" id="inp_n" value="120" style="width: 100%; padding: 8px;"></div>
-          <div><label style="font-size: 11px;">Pupuk P (kg/ha)</label><input type="number" id="inp_p" value="45" style="width: 100%; padding: 8px;"></div>
-          <div><label style="font-size: 11px;">Pupuk K (kg/ha)</label><input type="number" id="inp_k" value="80" style="width: 100%; padding: 8px;"></div>
-          <div><label style="font-size: 11px;">pH Tanah</label><input type="number" id="inp_ph" value="6.5" style="width: 100%; padding: 8px;"></div>
-          <div><label style="font-size: 11px;">Tingkat Hama (0-1)</label><input type="number" id="inp_pest" value="0.1" style="width: 100%; padding: 8px;"></div>
+
+        <div style="margin-bottom: 20px; max-width: 400px;">
+          <label style="font-size: 11px; color: var(--text-dim); display: block; margin-bottom: 5px;">Pilih Model Inteligensi Buatan:</label>
+          <select id="modelChoice" style="width: 100%; padding: 10px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text); font-family: 'Space Mono', monospace; font-weight: bold;">
+            <option value="random_forest">🌲 Random Forest (Ensemble — 88.77%)</option>
+            <option value="decision_tree">🌿 Decision Tree (Aturan Pohon — 88.24%)</option>
+            <option value="naive_bayes">📊 Naïve Bayes (Probabilistik — 78.28%)</option>
+          </select>
         </div>
-        <button id="btnPredict" style="padding: 12px 24px; background: var(--accent); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%;">🚀 Analisis Prediksi</button>
         
-        <div style="margin-top: 20px; padding: 20px; background: rgba(108,240,112,.1); border-radius: 8px; text-align: center;">
-          <h4 style="margin-bottom: 5px; color: var(--text-dim);">Status Hasil Panen:</h4>
-          <h2 id="hasilPrediksi" style="color: var(--accent); font-weight: 800; font-family: var(--fm);">-</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+          <div>
+            <label style="font-size: 11px; color: var(--text-dim);">Jenis Tanaman</label>
+            <select id="inp_crop" style="width: 100%; padding: 8px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); color: var(--text);">
+              <option value="3">🍅 Tomat</option>
+  <option value="0">🥒 Timun</option>
+  <option value="1">🥬 Selada</option>
+  <option value="2">🫑 Paprika</option>
+            </select>
+          </div>
+          <div><label style="font-size: 11px; color: var(--text-dim);">Suhu Rata-rata (°C)</label><input type="number" id="inp_temp" value="24.5" style="width: 100%; padding: 8px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); color: var(--text);" step="0.1"></div>
+          <div><label style="font-size: 11px; color: var(--text-dim);">Kelembapan (%)</label><input type="number" id="inp_hum" value="65.0" style="width: 100%; padding: 8px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); color: var(--text);" step="0.1"></div>
+          <div><label style="font-size: 11px; color: var(--text-dim);">CO2 (ppm)</label><input type="number" id="inp_co2" value="600" style="width: 100%; padding: 8px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); color: var(--text);"></div>
+          <div><label style="font-size: 11px; color: var(--text-dim);">Cahaya (Lux)</label><input type="number" id="inp_lux" value="15000" style="width: 100%; padding: 8px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); color: var(--text);"></div>
+          <div><label style="font-size: 11px; color: var(--text-dim);">Irigasi (mm)</label><input type="number" id="inp_irr" value="5.5" style="width: 100%; padding: 8px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); color: var(--text);" step="0.01"></div>
+          <div><label style="font-size: 11px; color: var(--text-dim);">Pupuk N (kg/ha)</label><input type="number" id="inp_n" value="120" style="width: 100%; padding: 8px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); color: var(--text);"></div>
+          <div><label style="font-size: 11px; color: var(--text-dim);">Pupuk P (kg/ha)</label><input type="number" id="inp_p" value="45" style="width: 100%; padding: 8px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); color: var(--text);"></div>
+          <div><label style="font-size: 11px; color: var(--text-dim);">Pupuk K (kg/ha)</label><input type="number" id="inp_k" value="80" style="width: 100%; padding: 8px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); color: var(--text);"></div>
+          <div><label style="font-size: 11px; color: var(--text-dim);">pH Tanah</label><input type="number" id="inp_ph" value="6.5" style="width: 100%; padding: 8px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); color: var(--text);" step="0.1"></div>
+          <div><label style="font-size: 11px; color: var(--text-dim);">Tingkat Hama (0-1)</label><input type="number" id="inp_pest" value="0.1" style="width: 100%; padding: 8px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); color: var(--text);" step="0.01"></div>
+        </div>
+        
+        <button id="btnPredict" style="padding: 12px 24px; background: var(--accent); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; font-family: 'Syne', sans-serif;">🚀 Analisis Prediksi Tunggal</button>
+        
+        <div style="margin-top: 15px; padding: 15px; background: rgba(255,255,255,0.01); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; text-align: center;">
+          <h4 style="margin-bottom: 5px; color: var(--text-dim);">Hasil Analisis Sistem:</h4>
+          <h2 id="hasilPrediksi" style="color: var(--accent); font-weight: 800; font-family: 'Space Mono', monospace;">-</h2>
         </div>
       </div>
 
       <div class="card full" style="margin-top: 25px; border-top: 2px solid #3b82f6;">
         <div class="card-head">
-          <h3>Prediksi Massal via File CSV (Batch Skenario)</h3>
+          <h3>Prediksi via File CSV (Batch Skenario)</h3>
+          <span class="card-tag" style="border-color:#10b981; color:#10b981;">Evaluation Metrics Dashboard</span>
         </div>
         <p style="font-size: 12px; color: var(--text-dim); margin-bottom: 15px; line-height: 1.5;">
-          Masukkan file <b>.csv</b> Anda yang berisi struktur kolom: <br>
-          <code style="background: rgba(255,255,255,0.05); padding: 3px 6px; border-radius: 4px; display: inline-block; margin-top: 5px;">
-            crop_type, avg_temperature_C, humidity_percent, co2_ppm, light_intensity_lux, irrigation_mm, fertilizer_N_kg_ha, fertilizer_P_kg_ha, fertilizer_K_kg_ha, soil_pH, pest_severity
-          </code>
+          Unggah data <b>.csv</b> pengujian. Apabila dokumen mengandung kolom target kunci jawaban asli (<code style="color:var(--accent);">Yield_Status</code>), klaster server otomatis mengalkulasi Laporan Performa Kinerja:
         </p>
         
-        <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 15px;">
-          <input type="file" id="csvFile" accept=".csv" style="padding: 8px; background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.2); border-radius: 6px; color: var(--text);">
-          <button id="btnBatchPredict" style="padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s;">📊 Mulai Prediksi Massal</button>
+        <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center; margin-bottom: 20px;">
+          <div style="flex: 1; min-width: 200px;">
+            <select id="batchModelChoice" style="width: 100%; padding: 8px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: var(--text); font-family: 'Space Mono', monospace;">
+              <option value="random_forest">🌲 Random Forest (Ensemble)</option>
+              <option value="decision_tree">🌿 Decision Tree (White-Box)</option>
+              <option value="naive_bayes">📊 Naïve Bayes (Baseline)</option>
+            </select>
+          </div>
+          <div style="flex: 1.5; min-width: 250px;">
+            <input type="file" id="csvFile" accept=".csv" style="width:100%; padding: 6px; background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.2); border-radius: 6px; color: var(--text);">
+          </div>
+          <div>
+            <button id="btnBatchPredict" style="padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Syne', sans-serif;">Mulai Prediksi</button>
+          </div>
+        </div>
+
+        <div id="evaluasiSkenarioContainer" style="display: none; margin-top: 25px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 20px; margin-bottom: 25px;">
+          <h4 style="margin-bottom: 15px; color: #3b82f6; font-family: 'Syne', sans-serif;">📈 Matriks Pengujian & Kinerja Validasi Lapangan</h4>
+          <div style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 20px;">
+            
+            <div style="flex: 1; min-width: 260px; text-align: center; background: rgba(255,255,255,0.01); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.03);">
+              <span style="font-size: 11px; color: var(--text-dim); display: block; margin-bottom: 10px;">CONFUSION MATRIX AUTOMATIC GRAPH</span>
+              <img id="confusionMatrixImg" src="" alt="Confusion Matrix" style="max-width: 100%; height: auto; border-radius: 4px;">
+            </div>
+
+            <div style="flex: 1.5; min-width: 320px; background: rgba(255,255,255,0.01); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.03);">
+              <span style="font-size: 11px; color: var(--text-dim); display: block; margin-bottom: 10px;">CLASSIFICATION REPORT METRICS</span>
+              <table style="width: 100%; font-size: 12px; text-align: center; border-collapse: collapse; font-family: 'Space Mono', monospace;">
+                <thead>
+                  <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--text-dim);">
+                    <th style="padding: 6px; text-align: left;">Kelas Evaluasi</th>
+                    <th style="padding: 6px;">Precision</th>
+                    <th style="padding: 6px;">Recall</th>
+                    <th style="padding: 6px;">F1-Score</th>
+                    <th style="padding: 6px;">Support</th>
+                  </tr>
+                </thead>
+                <tbody id="metricsTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="decisionTreeVisualContainer" style="display: none; background: rgba(255,255,255,0.01); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.03); text-align: center; margin-top: 20px;">
+            <span style="font-size: 11px; color: #10b981; display: block; font-weight: bold; margin-bottom: 10px;">🌴 VISUALISASI TREE MAP ARSITEKTUR KEPUTUSAN (DECISION TREE)</span>
+            <div style="background: white; padding: 10px; border-radius: 6px; overflow-x: auto;">
+              <img id="decisionTreeImg" src="" alt="Struktur Decision Tree" style="max-width: 100%; height: auto;">
+            </div>
+          </div>
         </div>
         
-        <div id="batchResultContainer" style="margin-top: 20px; display: none; max-height: 300px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;">
-          <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
-            <thead style="background: rgba(255,255,255,0.05); position: sticky; top: 0;">
-              <tr>
-                <th style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">Data Ke-</th>
-                <th style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">Komoditas</th>
-                <th style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">Status Prediksi Panen</th>
-              </tr>
-            </thead>
-            <tbody id="batchTableBody"></tbody>
-          </table>
+        <div id="batchResultContainer" style="margin-top: 20px; display: none;">
+          <span style="font-size: 11px; color: var(--text-dim); display: block; margin-bottom: 10px;">ROW BY ROW EVALUATION DATA</span>
+          <div style="max-height: 250px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
+              <thead style="background: rgba(255,255,255,0.05); position: sticky; top: 0; z-index: 5;">
+                <tr>
+                  <th style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">Data Ke-</th>
+                  <th style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">Komoditas</th>
+                  <th style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1);">Status Prediksi Panen</th>
+                </tr>
+              </thead>
+              <tbody id="batchTableBody"></tbody>
+            </table>
+          </div>
         </div>
+
       </div>
     </section>
+  </main>
   </main>
 
   <div class="tooltip" id="tooltip"></div>

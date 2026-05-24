@@ -1,70 +1,12 @@
-// ==========================================
-// INTEGRASI BATCH PREDIKSI (UPLOAD CSV MASSAL)
-// ==========================================
-document.getElementById("btnBatchPredict")?.addEventListener("click", async () => {
-  const fileInput = document.getElementById("csvFile");
-  const tableBody = document.getElementById("batchTableBody");
-  const container = document.getElementById("batchResultContainer");
+const BASE_URL = "http://localhost:5000";
 
-  // Validasi apakah user sudah memilih file
-  if (!fileInput.files || fileInput.files.length === 0) {
-    alert("Wajib pilih file CSV terlebih dahulu!");
-    return;
-  }
-
-  const file = fileInput.files[0];
-  const formData = new FormData();
-  formData.append("file", file); // Masukkan file ke form data
-
-  // Tampilkan teks loading sementara proses berjalan
-  tableBody.innerHTML = "<tr><td colspan='3' style='text-align:center; padding:20px; color:var(--text-dim);'>⏳ Sedang mengirim dan memproses data massal di server Python...</td></tr>";
-  container.style.display = "block";
-
-  try {
-    // Tembak file ke endpoint baru di Flask
-    const response = await fetch("http://localhost:5000/predict_batch", {
-      method: "POST",
-      body: formData, // Kirim objek file asli
-    });
-
-    const result = await response.json();
-
-    if (result.status === "success") {
-      tableBody.innerHTML = ""; // Hapus teks loading
-
-      // Looping data array hasil keluaran model
-      result.results.forEach((item) => {
-        const namaTanaman = item.crop_type === 3 ? "🍅 Tomat" : item.crop_type === 0 ? "🥒 Timun" : `Tanaman (${item.crop_type})`;
-        const warnaTeks = item.prediksi.includes("Tinggi") ? "var(--accent)" : "var(--danger)";
-
-        const rowHTML = `
-          <tr style="border-bottom: 1px solid rgba(255,255,255,0.03); background: rgba(255,255,255, 0.01);">
-            <td style="padding: 10px 12px; color: var(--text-dim);">${item.baris}</td>
-            <td style="padding: 10px 12px; font-weight: 500;">${namaTanaman}</td>
-            <td style="padding: 10px 12px; font-weight: bold; color: ${warnaTeks};">${item.prediksi}</td>
-          </tr>
-        `;
-        tableBody.innerHTML += rowHTML;
-      });
-    } else {
-      tableBody.innerHTML = `<tr><td colspan='3' style='text-align:center; color:var(--danger); padding:20px;'>❌ Gagal: ${result.message}</td></tr>`;
-    }
-  } catch (err) {
-    tableBody.innerHTML = "<tr><td colspan='3' style='text-align:center; color:var(--danger); padding:20px;'>❌ Koneksi terputus. Pastikan terminal app.py Anda menyala!</td></tr>";
-  }
-});
-
-// ==========================================
-// INTEGRASI API PREDIKSI
-// ==========================================
+// ── LOGIKA JALUR 1: SINGLE PREDICTION FORM INPUT ──
 document.getElementById("btnPredict")?.addEventListener("click", async () => {
-  const hasilEl = document.getElementById("hasilPrediksi");
-  hasilEl.innerText = "Memproses Model...";
-  hasilEl.style.color = "var(--text)";
-
-  // Tarik angka dari input formulir
-  const inputData = {
-    crop_type: parseFloat(document.getElementById("inp_crop").value),
+  const labelHasil = document.getElementById("hasilPrediksi");
+  
+  const payload = {
+    model_choice: document.getElementById("modelChoice").value,
+    crop_type: parseInt(document.getElementById("inp_crop").value),
     avg_temperature_C: parseFloat(document.getElementById("inp_temp").value),
     humidity_percent: parseFloat(document.getElementById("inp_hum").value),
     co2_ppm: parseFloat(document.getElementById("inp_co2").value),
@@ -74,29 +16,122 @@ document.getElementById("btnPredict")?.addEventListener("click", async () => {
     fertilizer_P_kg_ha: parseFloat(document.getElementById("inp_p").value),
     fertilizer_K_kg_ha: parseFloat(document.getElementById("inp_k").value),
     soil_pH: parseFloat(document.getElementById("inp_ph").value),
-    pest_severity: parseFloat(document.getElementById("inp_pest").value),
+    pest_severity: parseFloat(document.getElementById("inp_pest").value)
   };
 
+  labelHasil.innerText = "⏳ SEDANG MENGANALISIS...";
+  labelHasil.style.color = "var(--text-dim)";
+
   try {
-    // Tembak ke Backend Flask
-    const response = await fetch("http://localhost:5000/predict", {
+    const res = await fetch(`${BASE_URL}/predict`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(inputData),
+      body: JSON.stringify(payload)
     });
-
-    const result = await response.json();
-
-    if (result.status === "success") {
-      hasilEl.innerText = result.prediksi;
-      hasilEl.style.color = result.prediksi.includes("Tinggi") ? "var(--accent)" : "var(--danger)";
+    const data = await res.json();
+    if(data.status === "success") {
+      labelHasil.innerText = data.prediksi;
+      labelHasil.style.color = data.prediksi.includes("Tinggi") ? "#10b981" : "#ef4444";
     } else {
-      hasilEl.innerText = "Error Model: " + result.message;
-      hasilEl.style.color = "var(--danger)";
+      labelHasil.innerText = "❌ ERROR MEMPROSES";
+      labelHasil.style.color = "#ef4444";
     }
-  } catch (err) {
-    hasilEl.innerText = "Koneksi Gagal. Pastikan server app.py menyala!";
-    hasilEl.style.color = "var(--danger)";
+  } catch {
+    labelHasil.innerText = "❌ KONEKSI SERVER PUTUS";
+    labelHasil.style.color = "#ef4444";
+  }
+});
+
+// ── LOGIKA JALUR 2: BATCH PREDICTION VIA FILE CSV ──
+document.getElementById("btnBatchPredict")?.addEventListener("click", async () => {
+  const fileInput = document.getElementById("csvFile");
+  const tableBody = document.getElementById("batchTableBody");
+  const rowsContainer = document.getElementById("batchResultContainer");
+  const metricsContainer = document.getElementById("evaluasiSkenarioContainer");
+  const metricsTableBody = document.getElementById("metricsTableBody");
+  const matrixImg = document.getElementById("confusionMatrixImg");
+  const treeContainer = document.getElementById("decisionTreeVisualContainer");
+  const treeImg = document.getElementById("decisionTreeImg");
+
+  if (!fileInput.files || fileInput.files.length === 0) {
+    alert("Wajib memilih file .csv terlebih dahulu!");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", fileInput.files[0]);
+  formData.append("model_choice", document.getElementById("batchModelChoice").value);
+
+  tableBody.innerHTML = "<tr><td colspan='3' style='text-align:center; padding:15px; color:var(--text-dim);'>⏳ Klaster model sedang memproses data sensor massal...</td></tr>";
+  rowsContainer.style.display = "block";
+  metricsContainer.style.display = "none";
+  treeContainer.style.display = "none";
+
+  try {
+    const res = await fetch(`${BASE_URL}/predict_batch`, { method: "POST", body: formData });
+    const data = await res.json();
+
+    if (data.status === "success") {
+      tableBody.innerHTML = "";
+      
+      // 1. Mengisi Tabel Baris Prediksi Hasil CSV
+      data.results.forEach(item => {
+        const cropMapping = { 0: "🥒 Timun", 1: "🥬 Selada", 2: "🫑 Paprika", 3: "🍅 Tomat" };
+const komoditas = cropMapping[item.crop_type] || `Tanaman (${item.crop_type})`;
+        const warna = item.prediksi.includes("Tinggi") ? "#10b981" : "#ef4444";
+        tableBody.innerHTML += `
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.02);">
+            <td style="padding:10px; color:var(--text-dim);">${item.baris}</td>
+            <td style="padding:10px;">${komoditas}</td>
+            <td style="padding:10px; font-weight:bold; color:${warna};">${item.prediksi}</td>
+          </tr>`;
+      });
+
+      // 2. Jika Berkas Memiliki Label Jawaban, Bongkar Confusion Matrix & Klasifikasi Report
+      if (data.has_metrics) {
+        matrixImg.src = `data:image/png;base64,${data.confusion_matrix_img}`;
+        metricsTableBody.innerHTML = "";
+
+        const targets = ["0", "1", "macro avg", "weighted avg"];
+        const mapping = { "0": "Rendah (0)", "1": "Tinggi (1)", "macro avg": "Macro Avg", "weighted avg": "Weighted Avg" };
+
+        targets.forEach(key => {
+          if (data.report[key]) {
+            const row = data.report[key];
+            metricsTableBody.innerHTML += `
+              <tr style="border-bottom:1px solid rgba(255,255,255,0.02);">
+                <td style="padding:6px; text-align:left;">${mapping[key]}</td>
+                <td>${(row.precision * 100).toFixed(1)}%</td>
+                <td>${(row.recall * 100).toFixed(1)}%</td>
+                <td>${(row["f1-score"] * 100).toFixed(1)}%</td>
+                <td style="color:var(--text-dim);">${row.support}</td>
+              </tr>`;
+          }
+        });
+
+        // Baris Tambahan untuk Total Akurasi Global
+        if (data.report.accuracy !== undefined) {
+          metricsTableBody.innerHTML += `
+            <tr style="border-top:1px solid rgba(255,255,255,0.1); font-weight:bold; color:#10b981;">
+              <td style="padding:6px; text-align:left;">Total Accuracy</td>
+              <td colspan="3" style="text-align:center;">${(data.report.accuracy * 100).toFixed(1)}%</td>
+              <td style="color:var(--text-dim);">${data.results.length}</td>
+            </tr>`;
+        }
+
+        metricsContainer.style.display = "block";
+
+        // 3. KHUSUS JIKA MODEL ADALAH DECISION TREE DAN ADA STRUKTUR POHON KEPUTUSANNYA
+        if (data.tree_img && data.tree_img !== "") {
+          treeImg.src = `data:image/png;base64,${data.tree_img}`;
+          treeContainer.style.display = "block";
+        }
+      }
+    } else {
+      tableBody.innerHTML = `<tr><td colspan='3' style='color:#ef4444; padding:15px;'>❌ ${data.message}</td></tr>`;
+    }
+  } catch {
+    tableBody.innerHTML = "<tr><td colspan='3' style='color:#ef4444; padding:15px;'>❌ Sambungan Putus, Hidupkan Terminal app.py</td></tr>";
   }
 });
 
