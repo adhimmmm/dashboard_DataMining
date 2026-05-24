@@ -90,8 +90,7 @@ def predict_batch():
         model = models[selected_model]
         df = pd.read_csv(io.StringIO(file.stream.read().decode("UTF8")))
         
-        # ── 1. PROSES FIXING CROP_TYPE (UBAH TEKS STR KE ANGKA DI LEVEL DATAFRAME) ──
-        # Kita buat mapping huruf kecil agar aman dari variasi penulisan kapital
+        # ── 1. PROSES AMAN 1: AUTO-MAPPING CROP_TYPE (KATA -> ANGKA) ──
         text_to_num_mapping = {
             'cucumber': 0, 'cucumber ': 0, 'timun': 0,
             'lettuce': 1, 'lettuce ': 1, 'selada': 1,
@@ -99,13 +98,13 @@ def predict_batch():
             'tomato': 3, 'tomato ': 3, 'tomat': 3
         }
 
-        # Jika tipe data kolom crop_type masih berupa text string (object)
-        if df['crop_type'].dtype == 'object':
-            print("-> Mengonversi teks tanaman menjadi angka numerik...")
-            df['crop_type'] = df['crop_type'].astype(str).str.lower().str.strip().map(text_to_num_mapping)
-        
-        # Isi nilai kosong/tidak dikenali dengan angka 3 (Tomato) dan paksa DataFrame-nya menjadi int sejak awal
-        df['crop_type'] = df['crop_type'].fillna(3).astype(int)
+        if 'crop_type' in df.columns:
+            # Jika isinya teks string, ubah ke angka menggunakan mapping
+            if df['crop_type'].dtype == 'object':
+                df['crop_type'] = df['crop_type'].astype(str).str.lower().str.strip().map(text_to_num_mapping)
+            
+            # Paksa konversi ke numerik, jika ada yang gagal/NaN jadikan default 3 (Tomato), lalu paksa jadi int
+            df['crop_type'] = pd.to_numeric(df['crop_type'], errors='coerce').fillna(3).astype(int)
         
         # Validasi kelengkapan nama kolom prediktor dasar
         required_cols = ['crop_type'] + NUMERIC_COLS
@@ -113,16 +112,16 @@ def predict_batch():
         if missing_cols:
             return jsonify({'status': 'error', 'message': f'Kolom tidak cocok. Kurang: {", ".join(missing_cols)}'})
         
-        # ── 2. PROSES FIXING KOLOM NUMERIK SENSOR ──
-        # Memastikan seluruh nilai sensor bersih dari string nyasar dan dipaksa menjadi float
+        # Ambil nilai murni array setelah crop_type dijamin 100% berupa angka int
+        batch_crop_types = df['crop_type'].values
+        
+        # ── 2. PROSES AMAN 2: PAKSA SEMUA KOLOM SENSOR MENJADI NUMERIK MURNI ──
         for col in NUMERIC_COLS:
             df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0.0)
             
-        # Ambil nilai murni array setelah data dibersihkan total
-        batch_crop_types = df['crop_type'].values.astype(int) # 🔥 Di sini dipaksa menjadi array int murni
         batch_numeric_data = df[NUMERIC_COLS].values.astype(float)
         
-        # ── 3. PROTEKSI DYNAMIC SCALING (DOUBLE SCALING BYPASS) ──
+        # ── 3. PROTEKSI DOUBLE SCALING BYPASS ──
         if batch_numeric_data.max() <= 1.0:
             print("-> Jalur Bypass: Data CSV terdeteksi sudah dinormalisasi.")
             batch_final_input = np.column_stack((batch_crop_types, batch_numeric_data))
@@ -134,12 +133,12 @@ def predict_batch():
         # Eksekusi Prediksi Massal sekaligus
         predictions = model.predict(batch_final_input)
         
-        # Susun list data hasil prediksi per baris untuk dikirim ke javascript
+        # Susun hasil data rows untuk tabel HTML
         results = []
         for idx, pred in enumerate(predictions):
             results.append({
                 'baris': idx + 1,
-                'crop_type': int(batch_crop_types[idx]), # 🔥 Dijamin aman karena array dasar sudah berupa int
+                'crop_type': int(batch_crop_types[idx]), # Di sini dijamin aman dari string 'Tomato'
                 'prediksi': "🌟 Tinggi (1)" if pred == 1 else "⚠️ Rendah (0)"
             })
             
@@ -151,6 +150,8 @@ def predict_batch():
         
         target_col = [col for col in df.columns if col.lower().strip() == 'yield_status']
         if target_col and len(df) > 0:
+            # 🔥 PERBAIKAN MUTAKHIR: Gunakan errors='coerce' agar jika ada string nyasar di kolom target, 
+            # ia akan diubah menjadi NaN terlebih dahulu, diisi dengan 0, baru diubah aman menjadi int.
             df[target_col[0]] = pd.to_numeric(df[target_col[0]], errors='coerce').fillna(0).astype(int)
             y_true = df[target_col[0]].values
             y_pred = predictions
@@ -188,6 +189,8 @@ def predict_batch():
             'report': report_data
         })
     except Exception as e:
-        return jsonify({'status': 'error', 'message': str(e)})
+        return jsonify({'status': 'error', 'message': str(e)})  
+
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
